@@ -4,10 +4,7 @@ import './App.css';
 
 // Use GET https request on startup to get the state of the server.
 function App() {
-    const [items, setItems] = useState<Item[]>([
-        { name: 'apple', quant: 3, tags: 'red sweet'},
-        { name: 'apple', quant: 3, tags: 'green sour'},
-    ]);
+    const [items, setItems] = useState<Item[]>([]);
 
     useEffect(() => {
         get();
@@ -31,6 +28,9 @@ function App() {
                     <button onClick={() => get()} className="outer-button">
                     Refresh
                     </button>
+                    <button onClick={() => window.open("http://localhost:5000/data", "_blank")} className="outer-button">
+                    Download CSV
+                    </button>
                 </div>
 
                 <div className="inventory-container">
@@ -45,6 +45,8 @@ function App() {
                                     <li className="quant">
                                         <div>Quantity: </div>
                                         <div>{item.quant}</div>
+                                        <button className="square-button" onClick={() => minusOne(item)}>-</button>
+                                        <button className="square-button" onClick={() => plusOne(item)}>+</button>
                                     </li>
                                     <li className="tags">
                                         <div>Tags:  </div>
@@ -198,6 +200,47 @@ function App() {
 
         setEditItemPopupState(false)
     }
+
+    function plusOne(item: Item) {
+        // Update the item by adding 1 to the quantity
+        fetch("http://localhost:5000/items?name=" + item.name + "&quant=" + String(item.quant + 1) + "&tags=" + item.tags,
+            {
+                "method": "PUT",
+            }
+        )
+            .then(response => response.json())
+            .then(response => {
+                if (response['code'] === 200) {
+                    setItems(response['data'])
+                } else {
+                    alert("Error 404: The item '" + item.name + "'is not in the database")
+                }
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+    function minusOne(item: Item) {
+        // Update the item by subtracting 1 from the quantity
+        fetch("http://localhost:5000/items?name=" + item.name + "&quant=" + String(item.quant - 1) + "&tags=" + item.tags,
+            {
+                "method": "PUT",
+            }
+        )
+            .then(response => response.json())
+            .then(response => {
+                if (response['code'] === 200) {
+                    setItems(response['data'])
+                } else {
+                    alert("Error 404: The item '" + item.name + "'is not in the database")
+                }
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
 }
 
 interface Item {

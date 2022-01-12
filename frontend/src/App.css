@@ -178,3 +178,8 @@ label {
     padding: 1em;
     margin: 0;
 }
+
+.square-button {
+    width: 2em;
+    height: 2em;
+}
