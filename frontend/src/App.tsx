@@ -160,7 +160,6 @@ function App() {
         )
             .then(response => response.json())
             .then(response => {
-                console.log(response)
                 if (response['code'] === 200) {
                     setItems(response['data'])
                 } else {
@@ -169,6 +168,7 @@ function App() {
             })
             .catch(err => {
                 console.log(err);
+                alert("Connection Error: Please check your network or configuration and try again.")
             });
     }
 
@@ -198,6 +198,7 @@ function App() {
             })
             .catch(err => {
                 console.log(err);
+                alert("Connection Error: Please check your network or configuration and try again.")
             });
 
         setEditItemPopupState(false)
@@ -220,6 +221,7 @@ function App() {
             })
             .catch(err => {
                 console.log(err);
+                alert("Connection Error: Please check your network or configuration and try again.")
             });
     }
 
@@ -240,6 +242,7 @@ function App() {
             })
             .catch(err => {
                 console.log(err);
+                alert("Connection Error: Please check your network or configuration and try again.")
             });
     }
 

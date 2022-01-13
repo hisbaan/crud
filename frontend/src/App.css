@@ -182,4 +182,6 @@ label {
 .square-button {
     width: 2em;
     height: 2em;
+
+    margin-top: 0.5em;
 }

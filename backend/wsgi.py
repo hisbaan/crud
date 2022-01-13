@@ -182,4 +182,6 @@ class Items(Resource):
 # Setup API settings.
 api = Api(app)
 api.add_resource(Items, '/items') # '/items' is our entry point
-app.run(port=5000)
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
