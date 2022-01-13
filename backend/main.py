@@ -1,22 +1,59 @@
 from flask import Flask, send_from_directory, abort
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS
-import pandas as pd
+import sqlite3
+import csv
 
+
+# Setup flask settings.
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+
+
+def dict_factory(cursor: sqlite3.Cursor, row: sqlite3.Row):
+    """
+    Create a dictionary from a row of SQLite data.
+    """
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
+
+
+def get_db_connection() -> sqlite3.Connection:
+    """
+    Get the database connection and return it for use in the application.
+    """
+    connection = sqlite3.connect('items.db')
+    connection.row_factory = dict_factory
+    sqlite3.Row
+    return connection
+
+
+def id_exists(id: int, cursor: sqlite3.Cursor) -> bool:
+    """
+    Check if an item with the given ID exists in the database.
+    """
+    if cursor.execute(f"SELECT EXISTS(SELECT 1 FROM items WHERE id={id});").fetchone():
+        return True
+    else:
+        return False
+
 
 class Items(Resource):
     def get(self):
         """
         Get all items from the database.
         """
-        # Read the database.
-        data = pd.read_csv('./data/items.csv')
+        # Read from the database.
+        connection = get_db_connection()
+        cursor = connection.cursor()
+        data = cursor.execute('SELECT * FROM items;').fetchall()
+        connection.close()
 
         # Return data and an okay code.
-        return {'code': 200, 'data': data.to_dict('records')}
+        return {'code': 200, 'data': data}
 
 
     def post(self):
@@ -30,24 +67,23 @@ class Items(Resource):
         parser.add_argument('tags', required=True)
         args = parser.parse_args()
 
-        # Read the database.
-        data = pd.read_csv('data/items.csv')
+        # Get database connection.
+        connection = get_db_connection()
+        cursor = connection.cursor()
 
-        if args['name'] in list(data['name']):
-            # If the item is in the database, return a message saying it already exists.
-            return {'code': 404, 'message': f"'{args['name']}' already exists."}
-        else:
-            # If the item is not in the database, add it to the database.
-            new_data = pd.DataFrame({
-                'name': args['name'],
-                'quant': int(args['quant']),
-                'tags': args['tags'],
-            }, index=[0])
-            data = data.append(new_data, ignore_index=True)
+        # Write the new item into the database.
+        cursor.execute(
+            "INSERT INTO items (name, quant, tags) VALUES (?, ?, ?);",
+            (args['name'], int(args['quant']), args['tags'])
+        )
+        connection.commit()
 
-            # Return the current state of the database and and okay code.
-            data.to_csv('data/items.csv', index=False)
-            return {'code': 200, 'data': data.to_dict('records')}
+        # Get the database state.
+        data = cursor.execute('SELECT * FROM items;').fetchall()
+        connection.close()
+
+        # Return the current state of the database and a 200 code.
+        return {'code': 200, 'data': data}
 
 
     def delete(self):
@@ -56,22 +92,31 @@ class Items(Resource):
         """
         # Setup argument parser.
         parser = reqparse.RequestParser()
-        parser.add_argument('name', required=True)
+        parser.add_argument('id', required=True)
         args = parser.parse_args()
 
-        # Read the database.
-        data = pd.read_csv('data/items.csv')
+        # Get database connection.
+        connection = get_db_connection()
+        cursor = connection.cursor()
 
-        if args['name'] in list(data['name']):
-            data.drop(data.loc[data['name'] == args['name']].index, inplace=True)
+        # If the item is in the database, delete it from the databse.
+        # If it is not, return an error.
+        if id_exists(args['id'], cursor):
+            # Delete the item from the database.
+            cursor.execute(f"DELETE FROM items WHERE id = {args['id']};")
+            connection.commit()
+
+            # Get the new state of the database.
+            data = cursor.execute('SELECT * FROM items;').fetchall()
+            connection.close()
 
             # Return the current state of the database and and okay code.
-            data.to_csv('data/items.csv', index=False)
-            return {'code': 200, 'data': data.to_dict('records')}
+            return {'code': 200, 'data': data}
         else:
-            # If the item is not in the database, return a message stating that it is not
-            # in the database and return a 404, not found error code.
-            return {'code': 404, 'message': f"item '{args['name']}' not found"}
+            connection.close()
+
+            # Return an error code stating the item does not exist.
+            return {'code': 404, 'message': "requested item not found"}
 
 
     def put(self):
@@ -80,36 +125,61 @@ class Items(Resource):
         """
         # Setup argument parser.
         parser = reqparse.RequestParser()
+        parser.add_argument('id', required=True)
         parser.add_argument('name', required=True)
         parser.add_argument('quant', required=True)
         parser.add_argument('tags', required=True)
         args = parser.parse_args()
 
-        # Read the database.
-        data = pd.read_csv('data/items.csv')
+        # Get database connection.
+        connection = get_db_connection()
+        cursor = connection.cursor()
 
-        if args['name'] in list(data['name']):
-            # If the item is in the database, remove the item from the database.
-            data.loc[data['name'] == args['name'], 'quant'] = int(args['quant'])
-            data.loc[data['name'] == args['name'], 'tags'] = args['tags']
+        # If the item is in the database, modify it.
+        # If it is not, return an error.
+        if id_exists(args['id'], cursor):
+            # Modify the item in the databse.
+            cursor.execute(
+                f"UPDATE items SET name=?, quant=?, tags=? WHERE id=?;",
+                (args['name'], int(args['quant']), args['tags'], args['id'])
+            )
+
+            connection.commit()
+
+            # Get the new state of the database.
+            data = cursor.execute('SELECT * FROM items;').fetchall()
+            connection.close()
 
             # Return the current state of the database and and okay code.
-            data.to_csv('data/items.csv', index=False)
-            return {'code': 200, 'data': data.to_dict('records')}
+            return {'code': 200, 'data': data}
         else:
-            # If the item is not in the database, return a message stating that it is not
-            # in the database and return a 404, not found error code.
-            return {'code': 404, 'message': f"item '{args['name']}' not found"}
+            connection.close()
+
+            # Return an error code stating the item does not exist.
+            return {'code': 404, 'message': "requested item not found"}
 
 
     @app.route('/data')
     def get_csv():
+        # Get data from database.
+        connection = sqlite3.connect('items.db')
+        cursor = connection.cursor()
+        data = cursor.execute('SELECT * FROM items;').fetchall()
+
+        # Create CSV from data.
+        with open('data/items.csv', 'w') as f:
+            writer = csv.writer(f)
+            writer.writerow(['id', 'name', 'quant', 'tags'])
+            writer.writerows(data)
+
+        # Send CSV to user.
         try:
             return send_from_directory('data', 'items.csv')
         except FileNotFoundError:
             abort(404)
 
 
+# Setup API settings.
 api = Api(app)
 api.add_resource(Items, '/items') # '/items' is our entry point
 app.run(port=5000)

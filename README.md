@@ -4,25 +4,11 @@
 
 ## Frontend
 
-The frontend is written in React + TypeScript. First go to the `frontend` directory and run the `npm start` command to start the frontend server. The frontend server will then be launched on [localhost:3000](http://localhost:3000).
-<!-- ### `npm test` -->
-<!---->
-<!-- Launches the test runner in the interactive watch mode.\ -->
-<!-- See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information. -->
-
-<!-- ### `npm run build` -->
-<!---->
-<!-- Builds the app for production to the `build` folder.\ -->
-<!-- It correctly bundles React in production mode and optimizes the build for the best performance. -->
-<!---->
-<!-- The build is minified and the filenames include the hashes.\ -->
-<!-- Your app is ready to be deployed! -->
-<!---->
-<!-- See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information. -->
+The frontend is written in React + TypeScript. First go to the `frontend` directory and install all the node dependencies with `npm install`. Then, run the `npm start` command to start the frontend server. The frontend server will then be launched on [localhost:3000](http://localhost:3000).
 
 ## Backend
 
-The backend is written in Python + Flask. To start the backend server, go to the `backend` directory and run `python main.py`. This will start the server in development mode. The following are the HTTP calls available to accomplish a CRUD inventory system:
+The backend is written in Python + Flask. First, initialize the database. To do this, go to the `backend` directory and run `python init_db.py`. This will create a file `items.db` which is the database for the application. Next, start the backend server. Go to the `backend` directory (if you aren't already in it) and run `python main.py`. This will start the server in development mode. The following are the HTTP calls available to accomplish a CRUD inventory system:
 
 ### GET (Read)
 
@@ -69,10 +55,10 @@ If the item is not already in the database, then the server will add the item to
 To update an item in the database, structure your query as follows:
 
 ```
-http://localhost:5000/items?name=<name of item>&quant=<quantity of item>&tags=<tags of item separated by spaces>
+http://localhost:5000/items?id=<id of item>&name=<new name of item>&quant=<new quantity of item>&tags=<new tags of item separated by spaces>
 ```
 
-If the item is in the database, then the server will update the `quant` and `tags` fields and return the new database state.. It is important to note that you cannot modify the `name` field as that is the "key" so to speak. If you would like to edit the name, delete and re-create the item with the new name.
+If the item is in the database, then the server will update the `quant` and `tags` fields and return the new database state.
 
 If the item is not in the database, then the server will return a 404 error code.
 
@@ -81,7 +67,7 @@ If the item is not in the database, then the server will return a 404 error code
 To delete an item from the database, structure your query as follows:
 
 ```
-http://localhost:5000/items?name=<name of item>
+http://localhost:5000/items?id=<id of item>
 ```
 
 If the item is in the database, then the server will delete the item from the database and return the new database state.
