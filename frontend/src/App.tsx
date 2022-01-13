@@ -13,6 +13,7 @@ function App() {
     const [addItemPopupState, setAddItemPopupState] = useState<boolean>(false);
     const [editItemPopupState, setEditItemPopupState] = useState<boolean>(false);
 
+    const [id, setId] = useState(0);
     const [name, setName] = useState('');
     const [quant, setQuant] = useState(0);
     const [tags, setTags] = useState('');
@@ -93,7 +94,8 @@ function App() {
                             <form onSubmit={editItem}>
                                 <div className="form">
                                     <h1 className="form-header">Edit Item</h1>
-                                    <label> Name: {name} </label>
+                                    <label> Name: </label>
+                                    <input className="field" type="text" name="name" key="name" value={name} onChange={e => setName(e.target.value)} />
                                     <label> Quantity: </label>
                                     <input className="field" type="number" name="quant" key="quant" value={quant} onChange={e => setQuant(Number(e.target.value))} />
                                     <label> Tags (separated by spaces): </label>
@@ -151,8 +153,7 @@ function App() {
 
     function deleteItem(item: Item) {
         // Send DELETE request to server with 'name' and update the local list
-        setItems(items.filter(function(filt) { return filt !== item }));
-        fetch("http://localhost:5000/items?name=" + item.name,
+        fetch("http://localhost:5000/items?id=" + item.id,
             {
                 "method": "DELETE",
             }
@@ -163,7 +164,7 @@ function App() {
                 if (response['code'] === 200) {
                     setItems(response['data'])
                 } else {
-                    alert("Error 404: The item '" + name + "'is not in the database")
+                    alert("Error 404: The item '" + item.name + "'is not in the database")
                 }
             })
             .catch(err => {
@@ -172,6 +173,7 @@ function App() {
     }
 
     function editItemInput(item: Item) {
+        setId(item.id)
         setName(item.name);
         setQuant(item.quant);
         setTags(item.tags);
@@ -181,7 +183,7 @@ function App() {
 
     function editItem() {
         // Send name, quant, tags with PUT request to server then update the local list
-        fetch("http://localhost:5000/items?name=" + name + "&quant=" + quant + "&tags=" + tags,
+        fetch("http://localhost:5000/items?id=" + id + "&name=" + name + "&quant=" + quant + "&tags=" + tags,
             {
                 "method": "PUT",
             }
@@ -203,7 +205,7 @@ function App() {
 
     function plusOne(item: Item) {
         // Update the item by adding 1 to the quantity
-        fetch("http://localhost:5000/items?name=" + item.name + "&quant=" + String(item.quant + 1) + "&tags=" + item.tags,
+        fetch("http://localhost:5000/items?id=" + item.id + "&name=" + item.name + "&quant=" + String(item.quant + 1) + "&tags=" + item.tags,
             {
                 "method": "PUT",
             }
@@ -223,7 +225,7 @@ function App() {
 
     function minusOne(item: Item) {
         // Update the item by subtracting 1 from the quantity
-        fetch("http://localhost:5000/items?name=" + item.name + "&quant=" + String(item.quant - 1) + "&tags=" + item.tags,
+        fetch("http://localhost:5000/items?id=" + item.id + "&name=" + item.name + "&quant=" + String(item.quant - 1) + "&tags=" + item.tags,
             {
                 "method": "PUT",
             }
@@ -244,6 +246,7 @@ function App() {
 }
 
 interface Item {
+    id: number;
     name: string;
     quant: number;
     tags: string;
