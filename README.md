@@ -4,6 +4,8 @@
 
 ## Docker Installation
 
+### Setup
+
 The frontend and backend are both dockerized. Ensure that docker is installed and enabled following these [instructions](https://docs.docker.com/get-docker/). Then do the following:
 
 1. Clone the repository and go to where you cloned it. (`git clone https://github.com/hisbaan/crud; cd crud`)
@@ -15,6 +17,32 @@ docker compose up -d
 ```
 4. Repeat steps 2 and 3 for the `frontend` directory.
 5. Open [localhost:3000](http://localhost:3000)
+
+The following script will do all of the above:
+
+```bash
+git clone https://github.com/hisbaan/crud
+cd crud/backend
+docker compose up -d
+cd ../frontend
+docker compose up -d
+```
+
+This will setup and start the docker containers. To learn how to start and stop them after this, read the next section, `Start and Stop`.
+
+### Start and Stop
+
+To start the docker containers run the following command:
+
+```bash
+docker start crud-backend crud-frontend
+```
+
+To stop the docker containers run the following command:
+
+```bash
+docker stop crud-backend crud-frontend
+```
 
 ## Developer Installation
 

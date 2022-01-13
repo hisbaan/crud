@@ -8,4 +8,5 @@ COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 EXPOSE 5000
 COPY . .
-CMD ["python", "init_db.py", "&&", "flask", "run"]
+RUN python init_db.py
+CMD ["flask", "run"]
