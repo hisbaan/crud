@@ -2,6 +2,8 @@
 
 [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) is a basic inventory management system built using React. CRUD stands for Create, Read, Update, and Delete.
 
+The **additional feature** I chose to create was "Press a button to export product data to a CSV"
+
 ## Docker Installation
 
 ### Setup
