@@ -50,11 +50,11 @@ docker stop crud-backend crud-frontend
 
 ### Frontend
 
-The frontend is written in React + TypeScript. First go to the `frontend` directory and install all the node dependencies with `npm install`. Then, run the `npm start` command to start the frontend server. The frontend server will then be launched on [localhost:3000](http://localhost:3000).
+The frontend is written in React + TypeScript. Ensure that you have `nodejs` installed. First go to the `frontend` directory and install all the node dependencies with `npm install`. Then, run the `npm start` command to start the frontend server. The frontend server will then be launched on [localhost:3000](http://localhost:3000).
 
 ### Backend
 
-The backend is written in Python + Flask. First, initialize the database. To do this, go to the `backend` directory and run `python init_db.py`. This will create a file `items.db` which is the database for the application. Next, start the backend server. Go to the `backend` directory (if you aren't already in it) and run `python main.py`. This will start the server in development mode. The following are the HTTP calls available to accomplish a CRUD inventory system:
+The backend is written in Python + Flask. Ensure that you have `python` installed. Go to the `backend` and run `pip install -r requirements.txt` to install the dependencies. Next, we will initialize the database. Remain in the `backend` directory and run `python init_db.py`. This will create a file `items.db` which is the database for the application. Next, start the backend server. Go to the `backend` directory (if you aren't already in it) and run `python main.py`. This will start the server in development mode. The following are the HTTP calls available to accomplish a CRUD inventory system:
 
 #### GET (Read)
 
